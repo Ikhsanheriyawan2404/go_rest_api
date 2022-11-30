@@ -4,10 +4,12 @@ import (
 	"database/sql"
 	"golang_rest_api/helper"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func NewDB() *sql.DB {
-	db, err := sql.Open("mysql", "admin:admin@tcp(localhost:3360)/golang_rest")
+	db, err := sql.Open("mysql", "admin:admin@tcp(localhost:3306)/golang_rest")
 	helper.PanicIfError(err)
 
 	db.SetMaxIdleConns(5)
