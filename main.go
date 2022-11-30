@@ -4,6 +4,7 @@ import (
 	"golang_rest_api/app"
 	"golang_rest_api/controller"
 	"golang_rest_api/helper"
+	"golang_rest_api/middleware"
 	"golang_rest_api/repository"
 	"golang_rest_api/service"
 	"net/http"
@@ -24,14 +25,14 @@ func main() {
 	router := httprouter.New()
 
 	router.GET("/api/categories", categoryController.FindAll)
-	router.GET("/api/categories/:categoryId", categoryController.FindById)
-	router.POST("/api/categories", categoryController.Create)
-	router.PUT("/api/categories/:categoryId", categoryController.Update)
-	router.DELETE("/api/categories/:categoryId", categoryController.Delete)
+	// router.GET("/api/categories/:categoryId", categoryController.FindById)
+	// router.POST("/api/categories", categoryController.Create)
+	// router.PUT("/api/categories/:categoryId", categoryController.Update)
+	// router.DELETE("/api/categories/:categoryId", categoryController.Delete)
 
 	server := http.Server{
 		Addr:    "localhost:8080",
-		Handler: router,
+		Handler: middleware.NewAuthMiddleware(router),
 	}
 
 	err := server.ListenAndServe()
