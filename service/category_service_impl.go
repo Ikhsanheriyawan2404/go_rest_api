@@ -14,11 +14,19 @@ import (
 type CategoryServiceImpl struct {
 	CategoryRepository repository.CategoryRepository
 	DB                 *sql.DB
-	validate *validator.Validate
+	Validate           *validator.Validate
+}
+
+func NewCategoryService(categoryRepository repository.CategoryRepository,
+	DB *sql.DB,
+	validate *validator.Validate) CategoryService {
+	return &CategoryServiceImpl{
+		CategoryRepository: categoryRepository,
+	}
 }
 
 func (service *CategoryServiceImpl) Create(ctx context.Context, request web.CategoryCreateRequest) web.CategoryResponse {
-	err := service.validate.Struct(request)
+	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
 
 	tx, err := service.DB.Begin()
@@ -34,9 +42,9 @@ func (service *CategoryServiceImpl) Create(ctx context.Context, request web.Cate
 }
 
 func (service *CategoryServiceImpl) Update(ctx context.Context, request web.CategoryUpdateRequest) web.CategoryResponse {
-	err := service.validate.Struct(request)
+	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
-	
+
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
@@ -82,6 +90,3 @@ func (service *CategoryServiceImpl) FindAll(ctx context.Context) []web.CategoryR
 
 	return helper.ToCategoryResponses(categories)
 }
-
-
-

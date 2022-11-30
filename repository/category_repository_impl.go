@@ -11,19 +11,23 @@ import (
 type CategoryRepositoryImpl struct {
 }
 
-func (repository *CategoryRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, domain.Category) domain.Category {
+func NewCategoryRepository() CategoryRepository {
+	return &CategoryRepositoryImpl{}
+}
+
+func (repository *CategoryRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, category domain.Category) domain.Category {
 	SQL := "INSERT INTO categories(name) VALUES (?)"
 	result, err := tx.ExecContext(ctx, SQL, category.Name)
 	helper.PanicIfError(err)
 
 	id, err := result.LastInsertId()
-	helper.PanicIfError()
+	helper.PanicIfError(err)
 
 	category.Id = int(id)
 	return category
 }
 
-func (repository *CategoryRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, domain.Category) domain.Category {
+func (repository *CategoryRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, category domain.Category) domain.Category {
 	SQL := "UPDATE categories SET name = ? WHERE id = ?"
 	_, err := tx.ExecContext(ctx, SQL, category.Name, category.Id)
 	helper.PanicIfError(err)
@@ -31,7 +35,7 @@ func (repository *CategoryRepositoryImpl) Update(ctx context.Context, tx *sql.Tx
 	return category
 }
 
-func (repository *CategoryRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, domain.Category) domain.Category {
+func (repository *CategoryRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, category domain.Category) {
 	SQL := "DELETE categories WHERE id = ?"
 	_, err := tx.ExecContext(ctx, SQL, category.Id)
 	helper.PanicIfError(err)
@@ -39,7 +43,7 @@ func (repository *CategoryRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx
 
 func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, categoryId int) (domain.Category, error) {
 	SQL := "SELECT id, name FROM categories WHERE id = ?"
-	rows, err := tx.ExecContext(ctx, SQL, categoryId)
+	rows, err := tx.QueryContext(ctx, SQL, categoryId)
 	helper.PanicIfError(err)
 
 	category := domain.Category{}
@@ -52,14 +56,14 @@ func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *sql.
 	}
 }
 
-func (repository *CategoryRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx, domain.Category) []domain.Category {
+func (repository *CategoryRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) []domain.Category {
 	SQL := "SELECT id, name FROM categories"
-	rows, err := tx.ExecContext(ctx, SQL)
+	rows, err := tx.QueryContext(ctx, SQL)
 	helper.PanicIfError(err)
 
 	var categories []domain.Category
 	for rows.Next() {
-		category := domain.Category
+		category := domain.Category{}
 		err := rows.Scan(&category.Id, &category.Name)
 		helper.PanicIfError(err)
 		categories = append(categories, category)
