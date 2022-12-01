@@ -23,6 +23,8 @@ func NewCategoryService(categoryRepository repository.CategoryRepository,
 	validate *validator.Validate) CategoryService {
 	return &CategoryServiceImpl{
 		CategoryRepository: categoryRepository,
+		DB:                 DB,
+		Validate:           validate,
 	}
 }
 
